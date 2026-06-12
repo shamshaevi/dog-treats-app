@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Dog Treats Shop</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --pink-light: #FFF0F5;
+            --pink: #FF85A2;
+            --pink-dark: #E7577D;
+            --pink-accent: #FFB6C8;
+            --white: #FFFFFF;
+            --text-dark: #3D2C35;
+            --text-light: #8B7080;
+            --shadow: rgba(231, 87, 125, 0.15);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--pink-light);
+            color: var(--text-dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--pink) 0%, var(--pink-dark) 100%);
+            padding: 30px 20px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: var(--pink-light);
+            border-radius: 50% 50% 0 0;
+        }
+
+        .header .logo {
+            font-size: 48px;
+            margin-bottom: 8px;
+            display: block;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .header h1 {
+            color: var(--white);
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 14px;
+        }
+
+        /* User greeting */
+        .greeting {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .greeting h2 {
+            font-size: 20px;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .greeting p {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        /* Main content area */
+        .content {
+            padding: 0 16px 100px;
+        }
+
+        /* Feature cards */
+        .features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .feature-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 20px 16px;
+            text-align: center;
+            box-shadow: 0 4px 16px var(--shadow);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+        }
+
+        .feature-card:active {
+            transform: scale(0.96);
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .feature-card .icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .feature-card h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .feature-card p {
+            font-size: 12px;
+            color: var(--text-light);
+            line-height: 1.4;
+        }
+
+        /* Promo banner */
+        .promo-banner {
+            background: linear-gradient(135deg, var(--pink-accent) 0%, var(--pink) 100%);
+            border-radius: 20px;
+            padding: 24px 20px;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .promo-banner::before {
+            content: '';
+            position: absolute;
+            top: -30px;
+            right: -30px;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+        }
+
+        .promo-banner::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 30px;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+
+        .promo-banner h3 {
+            color: var(--white);
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .promo-banner p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+
+        .promo-btn {
+            display: inline-block;
+            background: var(--white);
+            color: var(--pink-dark);
+            font-size: 14px;
+            font-weight: 600;
+            padding: 10px 24px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s;
+            position: relative;
+            z-index: 1;
+        }
+
+        .promo-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Info section */
+        .info-section {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 24px 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 16px var(--shadow);
+        }
+
+        .info-section h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--pink-light);
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .info-item .info-icon {
+            width: 42px;
+            height: 42px;
+            background: var(--pink-light);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .info-item .info-text h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 2px;
+        }
+
+        .info-item .info-text p {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        /* Paw prints decoration */
+        .paw-decoration {
+            text-align: center;
+            padding: 16px 0;
+            font-size: 12px;
+            color: var(--pink-accent);
+            letter-spacing: 8px;
+        }
+
+        /* Bottom CTA */
+        .bottom-cta {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 16px 20px;
+            padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+            background: linear-gradient(180deg, transparent 0%, var(--pink-light) 30%);
+        }
+
+        .cta-button {
+            width: 100%;
+            background: linear-gradient(135deg, var(--pink) 0%, var(--pink-dark) 100%);
+            color: var(--white);
+            font-size: 16px;
+            font-weight: 700;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(231, 87, 125, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            letter-spacing: 0.3px;
+        }
+
+        .cta-button:active {
+            transform: scale(0.97);
+            box-shadow: 0 3px 12px rgba(231, 87, 125, 0.3);
+        }
+
+        /* Status badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--white);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--text-light);
+            margin-top: 12px;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #4CAF50;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* Haptic feedback helper (visual) */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <span class="logo">&#x1F436;</span>
+        <h1>Dog Treats Shop</h1>
+        <p>&#x1F43E; &#x041B;&#x0430;&#x043A;&#x043E;&#x043C;&#x0441;&#x0442;&#x0432;&#x0430; &#x0434;&#x043B;&#x044F; &#x0432;&#x0430;&#x0448;&#x0435;&#x0433;&#x043E; &#x043B;&#x044E;&#x0431;&#x0438;&#x043C;&#x0446;&#x0430; &#x1F43E;</p>
+        <div class="status-badge">
+            <span class="status-dot"></span>
+            &#x041C;&#x0430;&#x0433;&#x0430;&#x0437;&#x0438;&#x043D; &#x043E;&#x0442;&#x043A;&#x0440;&#x044B;&#x0442;
+        </div>
+    </div>
+
+    <!-- Greeting -->
+    <div class="greeting">
+        <h2 id="greeting-text">&#x0414;&#x043E;&#x0431;&#x0440;&#x043E; &#x043F;&#x043E;&#x0436;&#x0430;&#x043B;&#x043E;&#x0432;&#x0430;&#x0442;&#x044C;!</h2>
+        <p id="greeting-sub">&#x0421;&#x0430;&#x043C;&#x044B;&#x0435; &#x0432;&#x043A;&#x0443;&#x0441;&#x043D;&#x044B;&#x0435; &#x0438; &#x043F;&#x043E;&#x043B;&#x0435;&#x0437;&#x043D;&#x044B;&#x0435; &#x043B;&#x0430;&#x043A;&#x043E;&#x043C;&#x0441;&#x0442;&#x0432;&#x0430; &#x0434;&#x043B;&#x044F; &#x0441;&#x043E;&#x0431;&#x0430;&#x043A;</p>
+    </div>
+
+    <!-- Main content -->
+    <div class="content">
+        <!-- Feature cards -->
+        <div class="features">
+            <div class="feature-card" onclick="onCardClick('catalog')">
+                <span class="icon">&#x1F356;</span>
+                <h3>&#x041A;&#x0430;&#x0442;&#x0430;&#x043B;&#x043E;&#x0433;</h3>
+                <p>&#x041B;&#x0430;&#x043A;&#x043E;&#x043C;&#x0441;&#x0442;&#x0432;&#x0430; &#x043D;&#x0430; &#x043B;&#x044E;&#x0431;&#x043E;&#x0439; &#x0432;&#x043A;&#x0443;&#x0441;</p>
+            </div>
+            <div class="feature-card" onclick="onCardClick('popular')">
+                <span class="icon">&#x2B50;</span>
+                <h3>&#x041F;&#x043E;&#x043F;&#x0443;&#x043B;&#x044F;&#x0440;&#x043D;&#x043E;&#x0435;</h3>
+                <p>&#x0422;&#x043E;&#x043F; &#x043B;&#x0430;&#x043A;&#x043E;&#x043C;&#x0441;&#x0442;&#x0432; &#x043C;&#x0435;&#x0441;&#x044F;&#x0446;&#x0430;</p>
+            </div>
+            <div class="feature-card" onclick="onCardClick('delivery')">
+                <span class="icon">&#x1F69A;</span>
+                <h3>&#x0414;&#x043E;&#x0441;&#x0442;&#x0430;&#x0432;&#x043A;&#x0430;</h3>
+                <p>&#x0411;&#x044B;&#x0441;&#x0442;&#x0440;&#x043E; &#x0438; &#x0431;&#x0435;&#x0440;&#x0435;&#x0436;&#x043D;&#x043E;</p>
+            </div>
+            <div class="feature-card" onclick="onCardClick('about')">
+                <span class="icon">&#x1F49D;</span>
+                <h3>&#x041E; &#x043D;&#x0430;&#x0441;</h3>
+                <p>&#x041D;&#x0430;&#x0448;&#x0430; &#x0438;&#x0441;&#x0442;&#x043E;&#x0440;&#x0438;&#x044F;</p>
+            </div>
+        </div>
+
+        <!-- Promo banner -->
+        <div class="promo-banner">
+            <h3>&#x1F389; &#x0421;&#x043A;&#x043E;&#x0440;&#x043E; &#x043E;&#x0442;&#x043A;&#x0440;&#x044B;&#x0442;&#x0438;&#x0435;!</h3>
+            <p>&#x041C;&#x044B; &#x0433;&#x043E;&#x0442;&#x043E;&#x0432;&#x0438;&#x043C; &#x0434;&#x043B;&#x044F; &#x0432;&#x0430;&#x0441; &#x043B;&#x0443;&#x0447;&#x0448;&#x0438;&#x0435; &#x043B;&#x0430;&#x043A;&#x043E;&#x043C;&#x0441;&#x0442;&#x0432;&#x0430;. &#x041F;&#x043E;&#x0434;&#x043F;&#x0438;&#x0448;&#x0438;&#x0442;&#x0435;&#x0441;&#x044C;, &#x0447;&#x0442;&#x043E;&#x0431;&#x044B; &#x0443;&#x0437;&#x043D;&#x0430;&#x0442;&#x044C; &#x043F;&#x0435;&#x0440;&#x0432;&#x044B;&#x043C;&#x0438;!</p>
+            <button class="promo-btn" onclick="onSubscribe()">&#x1F514; &#x0423;&#x0437;&#x043D;&#x0430;&#x0442;&#x044C; &#x043F;&#x0435;&#x0440;&#x0432;&#x044B;&#x043C;</button>
+        </div>
+
+        <!-- Info section -->
+        <div class="info-section">
+            <h3>&#x1F43E; &#x041F;&#x043E;&#x0447;&#x0435;&#x043C;&#x0443; &#x043C;&#x044B;?</h3>
+            <div class="info-item">
+                <div class="info-icon">&#x1F331;</div>
+                <div class="info-text">
+                    <h4>&#x041D;&#x0430;&#x0442;&#x0443;&#x0440;&#x0430;&#x043B;&#x044C;&#x043D;&#x044B;&#x0439; &#x0441;&#x043E;&#x0441;&#x0442;&#x0430;&#x0432;</h4>
+                    <p>&#x0422;&#x043E;&#x043B;&#x044C;&#x043A;&#x043E; &#x043D;&#x0430;&#x0442;&#x0443;&#x0440;&#x0430;&#x043B;&#x044C;&#x043D;&#x044B;&#x0435; &#x0438;&#x043D;&#x0433;&#x0440;&#x0435;&#x0434;&#x0438;&#x0435;&#x043D;&#x0442;&#x044B; &#x0431;&#x0435;&#x0437; &#x0434;&#x043E;&#x0431;&#x0430;&#x0432;&#x043E;&#x043A;</p>
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-icon">&#x1F469;&#x200D;&#x1F373;</div>
+                <div class="info-text">
+                    <h4>&#x0420;&#x0443;&#x0447;&#x043D;&#x0430;&#x044F; &#x0440;&#x0430;&#x0431;&#x043E;&#x0442;&#x0430;</h4>
+                    <p>&#x041A;&#x0430;&#x0436;&#x0434;&#x043E;&#x0435; &#x043B;&#x0430;&#x043A;&#x043E;&#x043C;&#x0441;&#x0442;&#x0432;&#x043E; &#x0441;&#x0434;&#x0435;&#x043B;&#x0430;&#x043D;&#x043E; &#x0441; &#x043B;&#x044E;&#x0431;&#x043E;&#x0432;&#x044C;&#x044E;</p>
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-icon">&#x1F4E6;</div>
+                <div class="info-text">
+                    <h4>&#x0411;&#x044B;&#x0441;&#x0442;&#x0440;&#x0430;&#x044F; &#x0434;&#x043E;&#x0441;&#x0442;&#x0430;&#x0432;&#x043A;&#x0430;</h4>
+                    <p>&#x0414;&#x043E;&#x0441;&#x0442;&#x0430;&#x0432;&#x0438;&#x043C; &#x0437;&#x0430; 1-2 &#x0434;&#x043D;&#x044F; &#x043F;&#x043E; &#x0432;&#x0441;&#x0435;&#x0439; &#x0420;&#x043E;&#x0441;&#x0441;&#x0438;&#x0438;</p>
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-icon">&#x1F49C;</div>
+                <div class="info-text">
+                    <h4>&#x0413;&#x0430;&#x0440;&#x0430;&#x043D;&#x0442;&#x0438;&#x044F; &#x043A;&#x0430;&#x0447;&#x0435;&#x0441;&#x0442;&#x0432;&#x0430;</h4>
+                    <p>&#x0412;&#x0435;&#x0442;&#x0435;&#x0440;&#x0438;&#x043D;&#x0430;&#x0440;&#x043D;&#x044B;&#x0439; &#x043A;&#x043E;&#x043D;&#x0442;&#x0440;&#x043E;&#x043B;&#x044C; &#x043A;&#x0430;&#x0436;&#x0434;&#x043E;&#x0439; &#x043F;&#x0430;&#x0440;&#x0442;&#x0438;&#x0438;</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="paw-decoration">&#x1F43E; &#x1F43E; &#x1F43E; &#x1F43E; &#x1F43E;</div>
+    </div>
+
+    <!-- Bottom CTA -->
+    <div class="bottom-cta">
+        <button class="cta-button" onclick="onMainAction()">&#x1F43E; &#x041D;&#x0430;&#x0447;&#x0430;&#x0442;&#x044C; &#x043F;&#x043E;&#x043A;&#x0443;&#x043F;&#x043A;&#x0438;</button>
+    </div>
+
+    <script>
+        // Detect if running inside Telegram or in a regular browser
+        const isTelegram = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData !== '';
+
+        let tg = null;
+        let user = null;
+
+        if (isTelegram) {
+            tg = window.Telegram.WebApp;
+
+            try { tg.ready(); } catch (e) {}
+            try { tg.expand(); } catch (e) {}
+            try {
+                tg.setHeaderColor('#FF85A2');
+                tg.setBackgroundColor('#FFF0F5');
+            } catch (e) {}
+            try { tg.enableClosingConfirmation(); } catch (e) {}
+
+            // Get user info
+            user = tg.initDataUnsafe?.user;
+            if (user) {
+                var name = user.first_name || 'друг';
+                document.getElementById('greeting-text').textContent =
+                    getTimeGreeting() + ', ' + name + '!';
+            }
+
+            // Back button
+            try {
+                tg.BackButton.onClick(function() {
+                    tg.close();
+                });
+            } catch (e) {}
+
+            // Theme adaptation
+            try {
+                applyTheme();
+                tg.onEvent('themeChanged', applyTheme);
+            } catch (e) {}
+
+            // Setup MainButton
+            try {
+                if (tg.MainButton) {
+                    tg.MainButton.setText('Написать нам');
+                    tg.MainButton.color = '#E7577D';
+                    tg.MainButton.textColor = '#FFFFFF';
+                    tg.MainButton.onClick(function() {
+                        haptic('medium');
+                        tg.sendData(JSON.stringify({
+                            action: 'contact',
+                            user_id: user?.id,
+                            timestamp: Date.now()
+                        }));
+                    });
+                }
+            } catch (e) {}
+
+            console.log('Dog Treats Mini App initialized in Telegram!');
+            console.log('Platform:', tg.platform);
+            console.log('Version:', tg.version);
+        } else {
+            // Running in normal browser — update greeting with time only
+            document.getElementById('greeting-text').textContent =
+                getTimeGreeting() + '!';
+            console.log('Dog Treats Mini App running in browser (not Telegram).');
+        }
+
+        function getTimeGreeting() {
+            var hour = new Date().getHours();
+            if (hour >= 5 && hour < 12) return 'Доброе утро';
+            if (hour >= 12 && hour < 18) return 'Добрый день';
+            if (hour >= 18 && hour < 23) return 'Добрый вечер';
+            return 'Доброй ночи';
+        }
+
+        // Haptic feedback helper
+        function haptic(type) {
+            if (!tg) return;
+            try {
+                if (type === 'light') {
+                    tg.HapticFeedback.impactOccurred('light');
+                } else if (type === 'medium') {
+                    tg.HapticFeedback.impactOccurred('medium');
+                } else if (type === 'success') {
+                    tg.HapticFeedback.notificationOccurred('success');
+                } else if (type === 'warning') {
+                    tg.HapticFeedback.notificationOccurred('warning');
+                }
+            } catch (e) {}
+        }
+
+        // Card click handler
+        function onCardClick(section) {
+            haptic('light');
+
+            var messages = {
+                catalog: 'Каталог лакомств скоро появится! Мы подбираем лучшие угощения для вашего питомца.',
+                popular: 'Раздел "Популярное" в разработке. Скоро здесь появятся хиты продаж!',
+                delivery: 'Мы доставляем по всей России за 1-2 дня. Подробности скоро!',
+                about: 'Dog Treats Shop — магазин натуральных лакомств для собак. Мы любим животных и заботимся о их здоровье!'
+            };
+
+            var msg = messages[section] || 'Этот раздел скоро появится!';
+
+            if (tg) {
+                tg.showAlert(msg);
+            } else {
+                alert(msg);
+            }
+        }
+
+        // Subscribe button
+        function onSubscribe() {
+            haptic('success');
+            var msg = 'Спасибо! Мы уведомим вас о запуске магазина.';
+            if (tg) {
+                tg.showAlert(msg);
+            } else {
+                alert(msg);
+            }
+        }
+
+        // Main CTA button
+        function onMainAction() {
+            haptic('medium');
+            var msg = 'Магазин готовится к открытию! Совсем скоро здесь появится каталог лакомств для вашего любимца.';
+            if (tg) {
+                tg.showAlert(msg);
+            } else {
+                alert(msg);
+            }
+        }
+
+        // Theme adaptation (dark mode in Telegram)
+        function applyTheme() {
+            if (!tg) return;
+            try {
+                if (tg.colorScheme === 'dark') {
+                    document.documentElement.style.setProperty('--pink-light', '#2D1F25');
+                    document.documentElement.style.setProperty('--white', '#1E1E1E');
+                    document.documentElement.style.setProperty('--text-dark', '#F0E0E8');
+                    document.documentElement.style.setProperty('--text-light', '#B8A0B0');
+                    document.documentElement.style.setProperty('--shadow', 'rgba(0, 0, 0, 0.3)');
+                }
+            } catch (e) {}
+        }
+    </script>
+</body>
+</html>
