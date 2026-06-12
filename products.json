@@ -1,0 +1,134 @@
+{
+  "categories": [
+    {
+      "id": "dried",
+      "name": "Сушёные лакомства",
+      "icon": "\u{1F356}"
+    },
+    {
+      "id": "bones",
+      "name": "Косточки",
+      "icon": "\u{1F9B4}"
+    },
+    {
+      "id": "treats",
+      "name": "Печенье и снеки",
+      "icon": "\u{1F36A}"
+    },
+    {
+      "id": "chew",
+      "name": "Жевательные",
+      "icon": "\u{1F43E}"
+    }
+  ],
+  "products": [
+    {
+      "id": 1,
+      "category": "dried",
+      "name": "Сушёное лёгкое говяжье",
+      "description": "Нежное говяжье лёгкое, высушенное при низкой температуре. Идеально для тренировок.",
+      "price": 350,
+      "weight": "100 г",
+      "image": "https://placehold.co/300x300/FFB6C8/ffffff?text=\u{1F356}",
+      "badge": "Хит",
+      "available": true
+    },
+    {
+      "id": 2,
+      "category": "dried",
+      "name": "Сушёный рубец",
+      "description": "Натуральный говяжий рубец. Богат полезными ферментами для пищеварения.",
+      "price": 420,
+      "weight": "100 г",
+      "image": "https://placehold.co/300x300/FFB6C8/ffffff?text=\u{1F969}",
+      "badge": "",
+      "available": true
+    },
+    {
+      "id": 3,
+      "category": "dried",
+      "name": "Куриные шейки сушёные",
+      "description": "Хрустящие куриные шейки — источник кальция и хондроитина.",
+      "price": 290,
+      "weight": "150 г",
+      "image": "https://placehold.co/300x300/FFB6C8/ffffff?text=\u{1F357}",
+      "badge": "Новинка",
+      "available": true
+    },
+    {
+      "id": 4,
+      "category": "bones",
+      "name": "Косточка из жил",
+      "description": "Прессованная косточка из натуральных говяжьих жил. Долгое жевание.",
+      "price": 250,
+      "weight": "1 шт (~80 г)",
+      "image": "https://placehold.co/300x300/FFB6C8/ffffff?text=\u{1F9B4}",
+      "badge": "",
+      "available": true
+    },
+    {
+      "id": 5,
+      "category": "bones",
+      "name": "Оленьи рога",
+      "description": "Натуральные сброшенные рога оленя. Не крошатся, не пачкают.",
+      "price": 890,
+      "weight": "1 шт (M)",
+      "image": "https://placehold.co/300x300/FFB6C8/ffffff?text=\u{1F98C}",
+      "badge": "Премиум",
+      "available": true
+    },
+    {
+      "id": 6,
+      "category": "treats",
+      "name": "Печенье с индейкой",
+      "description": "Мини-печенье из рисовой муки с индейкой. Подходит для аллергиков.",
+      "price": 320,
+      "weight": "200 г",
+      "image": "https://placehold.co/300x300/FFB6C8/ffffff?text=\u{1F36A}",
+      "badge": "Гипоаллергенно",
+      "available": true
+    },
+    {
+      "id": 7,
+      "category": "treats",
+      "name": "Крекеры с лососем",
+      "description": "Хрустящие крекеры с лососем и льняным маслом. Для красивой шерсти.",
+      "price": 380,
+      "weight": "150 г",
+      "image": "https://placehold.co/300x300/FFB6C8/ffffff?text=\u{1F41F}",
+      "badge": "",
+      "available": true
+    },
+    {
+      "id": 8,
+      "category": "chew",
+      "name": "Бычий корень",
+      "description": "Натуральный сушёный бычий корень. Долгое жевание, чистка зубов.",
+      "price": 450,
+      "weight": "1 шт (~50 г)",
+      "image": "https://placehold.co/300x300/FFB6C8/ffffff?text=\u{1F43E}",
+      "badge": "Хит",
+      "available": true
+    },
+    {
+      "id": 9,
+      "category": "chew",
+      "name": "Трахея говяжья",
+      "description": "Сушёная говяжья трахея — природный источник хондроитина и глюкозамина.",
+      "price": 370,
+      "weight": "100 г",
+      "image": "https://placehold.co/300x300/FFB6C8/ffffff?text=\u{1F404}",
+      "badge": "",
+      "available": false
+    }
+  ],
+  "shop_info": {
+    "name": "Dog Treats Shop",
+    "description": "Натуральные лакомства для собак",
+    "currency": "\u20BD",
+    "min_order": 500,
+    "delivery": "Доставка по всей России 1-3 дня",
+    "phone": "+7 (999) 123-45-67",
+    "instagram": "@dog_treats_shop"
+  }
+}
