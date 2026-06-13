@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Dog Treats Shop</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5; color: #333; min-height: 100vh;
+        }
+
+        /* LOGIN */
+        .login-wrap {
+            display: flex; align-items: center; justify-content: center;
+            min-height: 100vh; padding: 20px;
+        }
+        .login-box {
+            background: #fff; border-radius: 16px; padding: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 400px; width: 100%;
+        }
+        .login-box h1 { font-size: 24px; margin-bottom: 8px; text-align: center; }
+        .login-box p { color: #888; font-size: 14px; text-align: center; margin-bottom: 24px; }
+        .login-box input {
+            width: 100%; padding: 12px 16px; border: 2px solid #e0e0e0; border-radius: 10px;
+            font-size: 15px; margin-bottom: 16px; outline: none;
+        }
+        .login-box input:focus { border-color: #E7577D; }
+        .login-box button {
+            width: 100%; padding: 14px; border: none; border-radius: 10px;
+            background: linear-gradient(135deg, #FF85A2, #E7577D); color: #fff;
+            font-size: 16px; font-weight: 700; cursor: pointer;
+        }
+        .login-error { color: #e74c3c; font-size: 13px; text-align: center; margin-top: 8px; }
+
+        /* ADMIN LAYOUT */
+        .admin { display: none; }
+        .admin.show { display: block; }
+
+        .topbar {
+            background: linear-gradient(135deg, #FF85A2, #E7577D); color: #fff;
+            padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;
+        }
+        .topbar h1 { font-size: 18px; }
+        .topbar button {
+            background: rgba(255,255,255,0.2); border: none; color: #fff;
+            padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer;
+        }
+
+        .tabs {
+            display: flex; background: #fff; border-bottom: 2px solid #f0f0f0;
+        }
+        .tab {
+            flex: 1; padding: 14px; text-align: center; font-size: 14px; font-weight: 600;
+            cursor: pointer; border-bottom: 3px solid transparent; color: #888;
+        }
+        .tab.active { color: #E7577D; border-bottom-color: #E7577D; }
+
+        .content { padding: 16px; max-width: 900px; margin: 0 auto; }
+
+        /* TABLE */
+        .card {
+            background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .card-header {
+            display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
+        }
+        .card-header h3 { font-size: 16px; }
+        .btn {
+            padding: 8px 16px; border: none; border-radius: 8px;
+            font-size: 13px; font-weight: 600; cursor: pointer;
+        }
+        .btn-primary { background: #E7577D; color: #fff; }
+        .btn-danger { background: #e74c3c; color: #fff; }
+        .btn-secondary { background: #f0f0f0; color: #333; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+        .product-row {
+            display: flex; align-items: center; gap: 12px; padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .product-row:last-child { border-bottom: none; }
+        .product-row .emoji { font-size: 32px; }
+        .product-row .info { flex: 1; }
+        .product-row .name { font-size: 14px; font-weight: 600; }
+        .product-row .meta { font-size: 12px; color: #888; }
+        .product-row .price { font-size: 16px; font-weight: 700; color: #E7577D; }
+        .product-row .actions { display: flex; gap: 6px; }
+
+        .unavailable-badge {
+            background: #ffeaea; color: #e74c3c; font-size: 10px; font-weight: 700;
+            padding: 2px 6px; border-radius: 4px; margin-left: 6px;
+        }
+
+        /* FORM */
+        .form-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .form-overlay.show { display: flex; }
+        .form-box {
+            background: #fff; border-radius: 16px; padding: 24px;
+            width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;
+        }
+        .form-box h2 { font-size: 18px; margin-bottom: 16px; }
+        .field { margin-bottom: 14px; }
+        .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #555; }
+        .field input, .field select, .field textarea {
+            width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px;
+            font-size: 14px; outline: none; font-family: inherit;
+        }
+        .field input:focus, .field select:focus, .field textarea:focus { border-color: #E7577D; }
+        .field textarea { resize: vertical; min-height: 80px; }
+        .form-actions { display: flex; gap: 8px; margin-top: 16px; }
+        .form-actions .btn { flex: 1; padding: 12px; font-size: 15px; }
+
+        .toggle {
+            display: flex; align-items: center; gap: 8px; cursor: pointer;
+        }
+        .toggle input { display: none; }
+        .toggle .slider {
+            width: 44px; height: 24px; background: #ccc; border-radius: 12px;
+            position: relative; transition: 0.3s;
+        }
+        .toggle .slider::after {
+            content: ''; width: 20px; height: 20px; background: #fff; border-radius: 50%;
+            position: absolute; top: 2px; left: 2px; transition: 0.3s;
+        }
+        .toggle input:checked + .slider { background: #4CAF50; }
+        .toggle input:checked + .slider::after { left: 22px; }
+
+        /* SHOP INFO FORM */
+        .info-form .field { margin-bottom: 12px; }
+
+        .stats {
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px;
+        }
+        .stat-card {
+            background: #fff; border-radius: 12px; padding: 16px; text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .stat-card .num { font-size: 28px; font-weight: 700; color: #E7577D; }
+        .stat-card .label { font-size: 12px; color: #888; margin-top: 4px; }
+    </style>
+</head>
+<body>
+    <!-- LOGIN -->
+    <div class="login-wrap" id="login-screen">
+        <div class="login-box">
+            <h1>&#x1F512; &#x0410;&#x0434;&#x043C;&#x0438;&#x043D;-&#x043F;&#x0430;&#x043D;&#x0435;&#x043B;&#x044C;</h1>
+            <p>Dog Treats Shop</p>
+            <input type="password" id="admin-pass" placeholder="&#x041F;&#x0430;&#x0440;&#x043E;&#x043B;&#x044C;" onkeydown="if(event.key==='Enter')doLogin()">
+            <button onclick="doLogin()">&#x0412;&#x043E;&#x0439;&#x0442;&#x0438;</button>
+            <div class="login-error" id="login-error"></div>
+        </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div class="admin" id="admin-screen">
+        <div class="topbar">
+            <h1>&#x1F43E; &#x0410;&#x0434;&#x043C;&#x0438;&#x043D;-&#x043F;&#x0430;&#x043D;&#x0435;&#x043B;&#x044C;</h1>
+            <button onclick="doLogout()">&#x0412;&#x044B;&#x0439;&#x0442;&#x0438;</button>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('products')">&#x1F4E6; &#x0422;&#x043E;&#x0432;&#x0430;&#x0440;&#x044B;</div>
+            <div class="tab" onclick="switchTab('categories')">&#x1F3F7; &#x041A;&#x0430;&#x0442;&#x0435;&#x0433;&#x043E;&#x0440;&#x0438;&#x0438;</div>
+            <div class="tab" onclick="switchTab('settings')">&#x2699;&#xFE0F; &#x041D;&#x0430;&#x0441;&#x0442;&#x0440;&#x043E;&#x0439;&#x043A;&#x0438;</div>
+        </div>
+
+        <div class="content" id="content"></div>
+    </div>
+
+    <!-- PRODUCT FORM MODAL -->
+    <div class="form-overlay" id="product-form" onclick="closeForm(event)">
+        <div class="form-box" onclick="event.stopPropagation()">
+            <h2 id="form-title">&#x0414;&#x043E;&#x0431;&#x0430;&#x0432;&#x0438;&#x0442;&#x044C; &#x0442;&#x043E;&#x0432;&#x0430;&#x0440;</h2>
+            <div class="field">
+                <label>&#x041D;&#x0430;&#x0437;&#x0432;&#x0430;&#x043D;&#x0438;&#x0435;</label>
+                <input type="text" id="f-name" placeholder="&#x0421;&#x0443;&#x0448;&#x0451;&#x043D;&#x043E;&#x0435; &#x043B;&#x0451;&#x0433;&#x043A;&#x043E;&#x0435; &#x0433;&#x043E;&#x0432;&#x044F;&#x0436;&#x044C;&#x0435;">
+            </div>
+            <div class="field">
+                <label>&#x041A;&#x0430;&#x0442;&#x0435;&#x0433;&#x043E;&#x0440;&#x0438;&#x044F;</label>
+                <select id="f-category"></select>
+            </div>
+            <div class="field">
+                <label>&#x0426;&#x0435;&#x043D;&#x0430;</label>
+                <input type="number" id="f-price" placeholder="350">
+            </div>
+            <div class="field">
+                <label>&#x0412;&#x0435;&#x0441; / &#x043A;&#x043E;&#x043B;-&#x0432;&#x043E;</label>
+                <input type="text" id="f-weight" placeholder="100 &#x0433;">
+            </div>
+            <div class="field">
+                <label>&#x041E;&#x043F;&#x0438;&#x0441;&#x0430;&#x043D;&#x0438;&#x0435;</label>
+                <textarea id="f-desc" placeholder="&#x041E;&#x043F;&#x0438;&#x0441;&#x0430;&#x043D;&#x0438;&#x0435; &#x0442;&#x043E;&#x0432;&#x0430;&#x0440;&#x0430;..."></textarea>
+            </div>
+            <div class="field">
+                <label>&#x0418;&#x0437;&#x043E;&#x0431;&#x0440;&#x0430;&#x0436;&#x0435;&#x043D;&#x0438;&#x0435; (&#x044D;&#x043C;&#x043E;&#x0434;&#x0437;&#x0438; &#x0438;&#x043B;&#x0438; URL)</label>
+                <input type="text" id="f-image" placeholder="&#x1F356; &#x0438;&#x043B;&#x0438; https://...">
+            </div>
+            <div class="field">
+                <label>&#x0411;&#x0435;&#x0439;&#x0434;&#x0436; (&#x043D;&#x0435;&#x043E;&#x0431;&#x044F;&#x0437;.)</label>
+                <input type="text" id="f-badge" placeholder="&#x0425;&#x0438;&#x0442;, &#x041D;&#x043E;&#x0432;&#x0438;&#x043D;&#x043A;&#x0430;, &#x041F;&#x0440;&#x0435;&#x043C;&#x0438;&#x0443;&#x043C;">
+            </div>
+            <div class="field">
+                <label class="toggle">
+                    <input type="checkbox" id="f-available" checked>
+                    <span class="slider"></span>
+                    &#x0412; &#x043D;&#x0430;&#x043B;&#x0438;&#x0447;&#x0438;&#x0438;
+                </label>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="closeForm()">&#x041E;&#x0442;&#x043C;&#x0435;&#x043D;&#x0430;</button>
+                <button class="btn btn-primary" onclick="saveProduct()">&#x0421;&#x043E;&#x0445;&#x0440;&#x0430;&#x043D;&#x0438;&#x0442;&#x044C;</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === SUPABASE ===
+        const SUPABASE_URL = 'https://xsjxvqvmnmdveehzhpim.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhzanh2cXZtbm1kdmVlaHpocGltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzMzcwMjQsImV4cCI6MjA5NjkxMzAyNH0.HO8w9fCM6iU5JTgmeN9gDgRbWfwhC9esJtO5FpS6P9c';
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // === ADMIN PASSWORD ===
+        const ADMIN_PASSWORD = 'dogadmin2024';
+
+        let currentTab = 'products';
+        let categories = [];
+        let products = [];
+        let shopInfo = {};
+        let editingProductId = null;
+
+        // === LOGIN ===
+        function doLogin() {
+            var pass = document.getElementById('admin-pass').value;
+            if (pass === ADMIN_PASSWORD) {
+                localStorage.setItem('admin_logged', 'true');
+                showAdmin();
+            } else {
+                document.getElementById('login-error').textContent = 'Неверный пароль';
+            }
+        }
+
+        function doLogout() {
+            localStorage.removeItem('admin_logged');
+            location.reload();
+        }
+
+        function showAdmin() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('admin-screen').classList.add('show');
+            loadAll();
+        }
+
+        // Check saved login
+        if (localStorage.getItem('admin_logged') === 'true') {
+            showAdmin();
+        }
+
+        // === DATA ===
+        async function loadAll() {
+            var [catRes, prodRes, infoRes] = await Promise.all([
+                sb.from('categories').select('*').order('sort_order'),
+                sb.from('products').select('*').order('id'),
+                sb.from('shop_info').select('*').eq('id', 1).single()
+            ]);
+            categories = catRes.data || [];
+            products = prodRes.data || [];
+            shopInfo = infoRes.data || {};
+            renderTab();
+        }
+
+        // === TABS ===
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach(function(t, i) {
+                t.classList.toggle('active', (i === 0 && tab === 'products') || (i === 1 && tab === 'categories') || (i === 2 && tab === 'settings'));
+            });
+            renderTab();
+        }
+
+        function renderTab() {
+            if (currentTab === 'products') renderProducts();
+            else if (currentTab === 'categories') renderCategories();
+            else if (currentTab === 'settings') renderSettings();
+        }
+
+        // === PRODUCTS TAB ===
+        function renderProducts() {
+            var avail = products.filter(function(p) { return p.available; }).length;
+            var html = '<div class="stats">';
+            html += '<div class="stat-card"><div class="num">' + products.length + '</div><div class="label">Всего</div></div>';
+            html += '<div class="stat-card"><div class="num">' + avail + '</div><div class="label">В наличии</div></div>';
+            html += '<div class="stat-card"><div class="num">' + categories.length + '</div><div class="label">Категорий</div></div>';
+            html += '</div>';
+
+            html += '<div class="card"><div class="card-header"><h3>Товары</h3>';
+            html += '<button class="btn btn-primary" onclick="openProductForm()">+ Добавить</button></div>';
+
+            products.forEach(function(p) {
+                var cat = categories.find(function(c) { return c.id === p.category; });
+                html += '<div class="product-row">';
+                html += '<span class="emoji">' + (p.image && !p.image.startsWith('http') ? p.image : '&#x1F43E;') + '</span>';
+                html += '<div class="info"><div class="name">' + p.name;
+                if (!p.available) html += '<span class="unavailable-badge">Нет в наличии</span>';
+                html += '</div><div class="meta">' + (cat ? cat.name : p.category) + ' &middot; ' + (p.weight || '') + '</div></div>';
+                html += '<span class="price">' + p.price + ' &#x20BD;</span>';
+                html += '<div class="actions">';
+                html += '<button class="btn btn-secondary btn-sm" onclick="editProduct(' + p.id + ')">&#x270F;</button>';
+                html += '<button class="btn btn-danger btn-sm" onclick="deleteProduct(' + p.id + ')">&#x2716;</button>';
+                html += '</div></div>';
+            });
+
+            html += '</div>';
+            document.getElementById('content').innerHTML = html;
+        }
+
+        // === PRODUCT FORM ===
+        function openProductForm(product) {
+            editingProductId = product ? product.id : null;
+            document.getElementById('form-title').textContent = product ? 'Редактировать товар' : 'Добавить товар';
+
+            // Fill category select
+            var sel = document.getElementById('f-category');
+            sel.innerHTML = '';
+            categories.forEach(function(c) {
+                var opt = document.createElement('option');
+                opt.value = c.id; opt.textContent = c.icon + ' ' + c.name;
+                if (product && product.category === c.id) opt.selected = true;
+                sel.appendChild(opt);
+            });
+
+            document.getElementById('f-name').value = product ? product.name : '';
+            document.getElementById('f-price').value = product ? product.price : '';
+            document.getElementById('f-weight').value = product ? (product.weight || '') : '';
+            document.getElementById('f-desc').value = product ? (product.description || '') : '';
+            document.getElementById('f-image').value = product ? (product.image || '') : '';
+            document.getElementById('f-badge').value = product ? (product.badge || '') : '';
+            document.getElementById('f-available').checked = product ? product.available : true;
+
+            document.getElementById('product-form').classList.add('show');
+        }
+
+        function editProduct(id) {
+            var p = products.find(function(x) { return x.id === id; });
+            if (p) openProductForm(p);
+        }
+
+        function closeForm(e) {
+            if (e && e.target !== document.getElementById('product-form')) return;
+            document.getElementById('product-form').classList.remove('show');
+            editingProductId = null;
+        }
+
+        async function saveProduct() {
+            var data = {
+                name: document.getElementById('f-name').value.trim(),
+                category: document.getElementById('f-category').value,
+                price: parseInt(document.getElementById('f-price').value) || 0,
+                weight: document.getElementById('f-weight').value.trim(),
+                description: document.getElementById('f-desc').value.trim(),
+                image: document.getElementById('f-image').value.trim(),
+                badge: document.getElementById('f-badge').value.trim(),
+                available: document.getElementById('f-available').checked
+            };
+
+            if (!data.name || !data.price) { alert('Заполните название и цену'); return; }
+
+            if (editingProductId) {
+                await sb.from('products').update(data).eq('id', editingProductId);
+            } else {
+                await sb.from('products').insert(data);
+            }
+
+            closeForm();
+            await loadAll();
+        }
+
+        async function deleteProduct(id) {
+            var p = products.find(function(x) { return x.id === id; });
+            if (!confirm('Удалить "' + p.name + '"?')) return;
+            await sb.from('products').delete().eq('id', id);
+            await loadAll();
+        }
+
+        // === CATEGORIES TAB ===
+        function renderCategories() {
+            var html = '<div class="card"><div class="card-header"><h3>Категории</h3>';
+            html += '<button class="btn btn-primary" onclick="addCategory()">+ Добавить</button></div>';
+
+            categories.forEach(function(c) {
+                html += '<div class="product-row">';
+                html += '<span class="emoji">' + c.icon + '</span>';
+                html += '<div class="info"><div class="name">' + c.name + '</div><div class="meta">ID: ' + c.id + '</div></div>';
+                html += '<div class="actions">';
+                html += '<button class="btn btn-danger btn-sm" onclick="deleteCategory(\'' + c.id + '\')">&#x2716;</button>';
+                html += '</div></div>';
+            });
+
+            html += '</div>';
+            document.getElementById('content').innerHTML = html;
+        }
+
+        async function addCategory() {
+            var name = prompt('Название категории:');
+            if (!name) return;
+            var icon = prompt('Эмодзи (например &#x1F356;):', '&#x1F43E;');
+            var id = name.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 20) || 'cat' + Date.now();
+
+            await sb.from('categories').insert({ id: id, name: name, icon: icon || '&#x1F43E;', sort_order: categories.length + 1 });
+            await loadAll();
+        }
+
+        async function deleteCategory(id) {
+            if (!confirm('Удалить категорию "' + id + '"? Товары в ней останутся без категории.')) return;
+            await sb.from('categories').delete().eq('id', id);
+            await loadAll();
+        }
+
+        // === SETTINGS TAB ===
+        function renderSettings() {
+            var s = shopInfo;
+            var html = '<div class="card info-form"><div class="card-header"><h3>&#x2699;&#xFE0F; Настройки магазина</h3></div>';
+            html += '<div class="field"><label>Название</label><input type="text" id="s-name" value="' + (s.name || '') + '"></div>';
+            html += '<div class="field"><label>Описание</label><input type="text" id="s-desc" value="' + (s.description || '') + '"></div>';
+            html += '<div class="field"><label>Валюта</label><input type="text" id="s-currency" value="' + (s.currency || '&#x20BD;') + '"></div>';
+            html += '<div class="field"><label>Мин. заказ</label><input type="number" id="s-min" value="' + (s.min_order || 500) + '"></div>';
+            html += '<div class="field"><label>Доставка</label><input type="text" id="s-delivery" value="' + (s.delivery || '') + '"></div>';
+            html += '<div class="field"><label>Телефон</label><input type="text" id="s-phone" value="' + (s.phone || '') + '"></div>';
+            html += '<div class="field"><label>Instagram</label><input type="text" id="s-insta" value="' + (s.instagram || '') + '"></div>';
+            html += '<button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;margin-top:8px" onclick="saveSettings()">&#x1F4BE; Сохранить настройки</button>';
+            html += '</div>';
+
+            html += '<div class="card" style="margin-top:16px"><div class="card-header"><h3>&#x1F512; Безопасность</h3></div>';
+            html += '<div class="field"><label>Новый пароль админки</label><input type="password" id="s-newpass" placeholder="Оставьте пустым, чтобы не менять"></div>';
+            html += '<p style="font-size:12px;color:#888;margin-top:8px">Пароль хранится в коде страницы. Для смены обновите admin.html</p>';
+            html += '</div>';
+
+            document.getElementById('content').innerHTML = html;
+        }
+
+        async function saveSettings() {
+            var data = {
+                name: document.getElementById('s-name').value.trim(),
+                description: document.getElementById('s-desc').value.trim(),
+                currency: document.getElementById('s-currency').value.trim(),
+                min_order: parseInt(document.getElementById('s-min').value) || 500,
+                delivery: document.getElementById('s-delivery').value.trim(),
+                phone: document.getElementById('s-phone').value.trim(),
+                instagram: document.getElementById('s-insta').value.trim()
+            };
+
+            await sb.from('shop_info').update(data).eq('id', 1);
+            shopInfo = Object.assign(shopInfo, data);
+            alert('Настройки сохранены!');
+        }
+    </script>
+</body>
+</html>
